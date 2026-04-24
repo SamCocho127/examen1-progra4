@@ -114,7 +114,7 @@ export default function CarParts() {
 
 					{visible < repuestosFiltrados.length && (
 						<button onClick={() => setVisible(visible + 10)}>
-							Ver más
+							Ver más ({repuestosFiltrados.length - visible} restantes)
 						</button>
 					)}
 				</>
