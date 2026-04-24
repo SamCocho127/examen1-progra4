@@ -105,6 +105,27 @@ main > p {
 	font-size: 12px;
 }
 
+.state-message {
+	max-width: 520px;
+	margin: 30px auto;
+	padding: 18px;
+	text-align: center;
+	border-radius: 12px;
+	background: #181a22;
+	border: 1px solid #2b2d3a;
+	color: #d1d5db;
+}
+
+.error-message {
+	border-color: #7f1d1d;
+	background: #2a1518;
+	color: #fecaca;
+}
+
+.empty-message {
+	color: #9ca3af;
+}
+
 button {
 	display: block;
 	margin: 40px auto 0;

@@ -14,6 +14,9 @@ export default function CarParts() {
 	useEffect(() => {
 		async function cargarRepuestos() {
 			try {
+				setLoading(true);
+				setError("");
+
 				const response = await fetch(API_URL, {
 					headers: {
 						"X-Access-Key": ACCESS_KEY,
@@ -21,13 +24,20 @@ export default function CarParts() {
 				});
 
 				if (!response.ok) {
-					throw new Error("Error al obtener los datos");
+					throw new Error("No se pudieron cargar los repuestos.");
 				}
 
 				const data = await response.json();
-				setRepuestos(data.record.articles || []);
+				const lista = data?.record?.articles;
+
+				if (!Array.isArray(lista)) {
+					throw new Error("La respuesta de la API no tiene el formato esperado.");
+				}
+
+				setRepuestos(lista);
 			} catch (err) {
 				setError(err.message);
+				setRepuestos([]);
 			} finally {
 				setLoading(false);
 			}
@@ -52,7 +62,6 @@ export default function CarParts() {
 				Mostrando {repuestosVisibles.length} de {repuestosFiltrados.length} artículos
 			</p>
 
-			{}
 			<input
 				className="search-input"
 				type="text"
@@ -64,35 +73,51 @@ export default function CarParts() {
 				}}
 			/>
 
-			{loading && <p>Cargando repuestos...</p>}
-			{error && <p>{error}</p>}
-
-			{!loading && !error && (
-				<section className="car-parts-list">
-					{repuestosVisibles.map((repuesto) => (
-						<article className="car-part-card" key={repuesto.articleId}>
-							<img
-								src={repuesto.s3image}
-								alt={repuesto.articleProductName}
-							/>
-
-							<div className="car-part-info">
-								<h2>{repuesto.articleProductName}</h2>
-								<p>{repuesto.articleNo}</p>
-
-								<span>#{repuesto.supplierId}</span>
-								<small>{repuesto.supplierName}</small>
-							</div>
-						</article>
-					))}
-				</section>
+			{loading && (
+				<div className="state-message">
+					<p>Cargando repuestos...</p>
+				</div>
 			)}
 
-			{/* BOTÓN VER MÁS */}
-			{visible < repuestosFiltrados.length && (
-				<button onClick={() => setVisible(visible + 10)}>
-					Ver más
-				</button>
+			{error && !loading && (
+				<div className="state-message error-message">
+					<p>{error}</p>
+				</div>
+			)}
+
+			{!loading && !error && repuestosFiltrados.length === 0 && (
+				<div className="state-message empty-message">
+					<p>No se encontraron repuestos.</p>
+				</div>
+			)}
+
+			{!loading && !error && repuestosFiltrados.length > 0 && (
+				<>
+					<section className="car-parts-list">
+						{repuestosVisibles.map((repuesto) => (
+							<article className="car-part-card" key={repuesto.articleId}>
+								<img
+									src={repuesto.s3image}
+									alt={repuesto.articleProductName}
+								/>
+
+								<div className="car-part-info">
+									<h2>{repuesto.articleProductName}</h2>
+									<p>{repuesto.articleNo}</p>
+
+									<span>#{repuesto.supplierId}</span>
+									<small>{repuesto.supplierName}</small>
+								</div>
+							</article>
+						))}
+					</section>
+
+					{visible < repuestosFiltrados.length && (
+						<button onClick={() => setVisible(visible + 10)}>
+							Ver más
+						</button>
+					)}
+				</>
 			)}
 		</main>
 	);
