@@ -7,6 +7,7 @@ const ACCESS_KEY = import.meta.env.VITE_JSONBIN_ACCESS_KEY;
 export default function CarParts() {
 	const [repuestos, setRepuestos] = useState([]);
 	const [visible, setVisible] = useState(10);
+	const [busqueda, setBusqueda] = useState("");
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
 
@@ -24,10 +25,7 @@ export default function CarParts() {
 				}
 
 				const data = await response.json();
-
-				const lista = data.record.articles;
-
-				setRepuestos(lista || []);
+				setRepuestos(data.record.articles || []);
 			} catch (err) {
 				setError(err.message);
 			} finally {
@@ -38,12 +36,33 @@ export default function CarParts() {
 		cargarRepuestos();
 	}, []);
 
-	const repuestosVisibles = repuestos.slice(0, visible);
+	const repuestosFiltrados = repuestos.filter((repuesto) =>
+		repuesto.articleProductName.toLowerCase().includes(busqueda.toLowerCase()) ||
+		repuesto.articleNo.toLowerCase().includes(busqueda.toLowerCase()) ||
+		repuesto.supplierName.toLowerCase().includes(busqueda.toLowerCase())
+	);
+
+	const repuestosVisibles = repuestosFiltrados.slice(0, visible);
 
 	return (
 		<main>
 			<h1>Repuestos</h1>
-			<p>Mostrando {repuestosVisibles.length} de {repuestos.length} artículos</p>
+
+			<p>
+				Mostrando {repuestosVisibles.length} de {repuestosFiltrados.length} artículos
+			</p>
+
+			{}
+			<input
+				className="search-input"
+				type="text"
+				placeholder="Buscar por nombre, código o proveedor..."
+				value={busqueda}
+				onChange={(e) => {
+					setBusqueda(e.target.value);
+					setVisible(10);
+				}}
+			/>
 
 			{loading && <p>Cargando repuestos...</p>}
 			{error && <p>{error}</p>}
@@ -69,7 +88,8 @@ export default function CarParts() {
 				</section>
 			)}
 
-			{visible < repuestos.length && (
+			{/* BOTÓN VER MÁS */}
+			{visible < repuestosFiltrados.length && (
 				<button onClick={() => setVisible(visible + 10)}>
 					Ver más
 				</button>
